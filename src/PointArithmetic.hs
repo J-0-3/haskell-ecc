@@ -1,22 +1,27 @@
-module Lib (doublePoint, addPoints, CurvePoint (Point, Infinity), modInverse, multiplyPoint) where
+module PointArithmetic (doublePoint, addPoints, CurvePoint (Point, Infinity), multiplyPoint, getYCoordinates, WeierstrassCurve, xCoord, yCoord) where
+
+import ModularArithmetic (modInverse, modSquareRoot)
 
 type WeierstrassCurve = (Integer, Integer, Integer)
 
 data CurvePoint = Infinity | Point Integer Integer deriving (Show)
 
-modInverse' :: Integer -> Integer -> Integer -> Integer -> Integer
-modInverse' _ t2 1 _ = t2
-modInverse' t1 t2 x m = modInverse' t2 (t1 - (m `div` x) * t2) (m `mod` x) x
+xCoord :: CurvePoint -> Integer
+xCoord (Point x y) = x
+xCoord Infinity = error "Point at Infinity does not have an X coordinate"
 
-modInverse :: Integer -> Integer -> Integer
-modInverse 0 _ = error "Cannot compute inverse 0 (undefined)"
-modInverse x m
-  | gcd x m == 1 = mod (modInverse' 0 1 x m) m
-  | otherwise = error "Cannot compute inverse over divisible modulus"
+yCoord :: CurvePoint -> Integer
+yCoord (Point x y) = y
+yCoord Infinity = error "Point at Infinity does not have a Y coordinate"
 
 tangentGradAtPoint :: WeierstrassCurve -> CurvePoint -> Integer
 tangentGradAtPoint (a, _, m) (Point x y) = ((3 * (x ^ 2) + a) * modInverse (2 * y) m) `mod` m
 tangentGradAtPoint _ Infinity = error "Cannot find tangent at infinity"
+
+getYCoordinates :: WeierstrassCurve -> Integer -> (Integer, Integer)
+getYCoordinates (a, b, m) x = (root, (-root) `mod` m)
+  where
+    root = modSquareRoot ((x ^ 3) + a * x + b) m
 
 doublePoint :: WeierstrassCurve -> CurvePoint -> CurvePoint
 doublePoint (a, b, m) (Point x y) = Point x' ((λ * x - λ * x' - y) `mod` m)

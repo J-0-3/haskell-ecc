@@ -22,7 +22,9 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Crypto
+      ModularArithmetic
+      PointArithmetic
   other-modules:
       Paths_ecc
   autogen-modules:
